@@ -153,12 +153,12 @@
 
       .hero {
         position: relative;
-        height: calc(100vh - var(--navH));
+        min-height: calc(100vh - var(--navH));
         display: grid;
         align-items: center;
         padding-top: calc(var(--sectionY) - 24px);
         padding-bottom: calc(var(--sectionY) - 8px);
-        overflow: hidden;
+        overflow: visible;
       }
       .hero::after {
         content: "";
@@ -1203,13 +1203,6 @@
         .hero::after {
           top: 36%;
           opacity: 0.04;
-        }
-      }
-      @media (max-width: 389px) {
-        .hero {
-          height: auto;
-          min-height: calc(100vh - var(--navH));
-          overflow: visible;
         }
       }
     </style>
