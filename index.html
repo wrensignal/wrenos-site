@@ -1137,6 +1137,15 @@
         .how-card::after { display: none; }
       }
       @media (max-width: 774px) {
+        body {
+          padding-top: var(--navH);
+        }
+        .nav {
+          position: fixed;
+          top: 0;
+          left: 0;
+          right: 0;
+        }
         .container {
           padding-inline: clamp(30px, 6vw, 48px);
         }
@@ -1210,7 +1219,7 @@
   <body>
     <header class="nav">
       <div class="container nav-inner">
-        <div class="wordmark"><img src="./assets/wren-white.png" alt="" aria-hidden="true" />WrenOS</div>
+        <a class="wordmark" href="/"><img src="./assets/wren-white.png" alt="" aria-hidden="true" />WrenOS</a>
         <nav class="nav-links" aria-label="Primary">
           <a href="/docs/">Docs</a>
           <a href="https://api.speakeasyrelay.com" target="_blank" rel="noreferrer">Speakeasy</a>

@@ -38,10 +38,11 @@
       .top-nav {
         position: sticky; top: 0; z-index: 40; height: var(--nav-h);
         border-bottom: 1px solid var(--border); background: rgba(10,10,12,0.96); backdrop-filter: blur(8px);
-        display: flex; align-items: center; justify-content: center; padding: 0 24px;
+        display: flex; align-items: center; justify-content: center; padding: 0;
       }
       .top-nav-inner {
         width: min(1400px, 100%);
+        padding-inline: 48px;
         display: flex;
         align-items: center;
         justify-content: space-between;
@@ -68,15 +69,17 @@
       .top-right { display: flex; gap: 16px; align-items: center; }
       .top-link { color: var(--muted); font-size: 14px; }
       .top-link:hover { color: var(--text); }
-      .menu-btn { display: none; border: 1px solid var(--border); background: #121214; color: var(--text); width: 40px; height: 40px; border-radius: 8px; }
+      .mobile-back-link { display: none; color: var(--muted); font-size: 14px; line-height: 1; }
+      .mobile-back-link:hover { color: var(--text); }
+      .menu-btn { display: none; border: 1px solid var(--border); background: #121214; color: var(--text); width: 40px; height: 40px; border-radius: 8px; font-size: 18px; transition: border-color .16s ease, color .16s ease; }
 
       .layout {
         display: grid;
         grid-template-columns: var(--sidebar-w) minmax(0, 1fr) var(--toc-w);
         gap: 40px;
-        width: min(1400px, 100% - 48px);
+        width: min(1400px, 100%);
         margin: 0 auto;
-        padding: 24px 0 64px;
+        padding: 24px 48px 64px;
       }
 
       .sidebar {
@@ -108,15 +111,71 @@
       ul { margin: 16px 0 0; padding-left: 20px; }
       code.inline { font-family: "IBM Plex Mono", monospace; font-size: 14px; background: rgba(255,255,255,.06); padding: 2px 6px; border-radius: 4px; }
 
-      .stats-block {
-        margin-top: 32px; border: 1px solid var(--border); border-radius: 12px; background: #101012; padding: 18px;
-        font-family: "IBM Plex Mono", monospace;
+      .cred-stats {
+        margin-top: 48px;
+        max-width: 720px;
+        width: 100%;
+        border: 1px solid rgba(255,255,255,0.10);
+        border-radius: var(--radius-sm);
+        background: rgba(234, 236, 242, 0.01);
+        padding: 1px 20px 10px 20px;
       }
-      .prompt { color: var(--accent); }
-      .inv-row { display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px dashed rgba(255,255,255,.04); }
-      .inv-row:last-child { border-bottom: 0; }
-      .inv-key { color: rgba(255,255,255,.65); }
-      .inv-val { color: rgba(255,255,255,.95); }
+      .inventory-label {
+        position: relative;
+        margin: 0 -20px 16px;
+        padding: 0 20px;
+        height: 37px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-family: "IBM Plex Mono", monospace;
+        font-size: 11px;
+        line-height: 1;
+        letter-spacing: 0.1em;
+        color: rgba(160, 165, 178, 0.84);
+        border-bottom: 1px solid rgba(255,255,255,0.08);
+      }
+      .inventory-label::before {
+        content: "";
+        position: absolute;
+        left: 20px;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        background: radial-gradient(circle at 50% 50%, rgba(10, 10, 12, 0.96) 0 1.8px, rgba(120, 124, 136, 0.62) 1.8px 100%);
+        box-shadow:
+          22px 0 0 rgba(120, 124, 136, 0.58),
+          44px 0 0 rgba(120, 124, 136, 0.42);
+      }
+      .inventory-list {
+        margin: 0;
+        padding: 0;
+        list-style: none;
+        display: grid;
+        gap: 0;
+      }
+      .inventory-row {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        gap: 16px;
+        align-items: baseline;
+        font-family: "IBM Plex Mono", monospace;
+        font-size: 13px;
+        line-height: 1.35;
+        padding: 2px 0;
+      }
+      .inventory-key {
+        color: rgba(160, 165, 178, 0.7);
+        text-transform: lowercase;
+      }
+      .inventory-val {
+        color: rgba(234, 236, 242, 0.98);
+        text-align: right;
+        font-variant-numeric: tabular-nums;
+        font-feature-settings: "tnum" 1;
+      }
 
       .cards { margin-top: 32px; display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 24px; }
       .card { border: 1px solid var(--border); border-radius: var(--radius-md); background: var(--card); padding: 24px; display: grid; gap: 12px; }
@@ -164,21 +223,66 @@
       .toc-link { display: block; font-size: 13px; color: rgba(255,255,255,.56); padding: 6px 0; }
       .toc-link.active { color: var(--accent); }
       .toc-link.level-3 { padding-left: 12px; }
+      .menu-overlay {
+        display: none;
+      }
 
       @media (max-width: 1102px) {
         .layout { grid-template-columns: var(--sidebar-w) minmax(0, 1fr); }
         .toc { display: none; }
       }
       @media (max-width: 768px) {
+        body { padding-top: var(--nav-h); }
+        .top-nav { position: fixed; top: 0; left: 0; right: 0; padding: 0; }
+        .top-nav-inner { padding-inline: clamp(30px, 6vw, 48px); }
         .menu-btn { display: inline-flex; align-items: center; justify-content: center; }
-        .layout { grid-template-columns: 1fr; width: calc(100% - 32px); gap: 0; }
+        .top-right { margin-left: auto; }
+        .top-right .top-link { display: none; }
+        .mobile-back-link {
+          display: inline-flex !important;
+          align-items: center;
+          justify-content: center;
+          min-height: 40px;
+          padding: 0 4px;
+          font-size: 20px;
+          color: rgba(255,255,255,0.86);
+        }
+        .layout { grid-template-columns: 1fr; width: min(1400px, 100%); padding-inline: clamp(30px, 6vw, 48px); gap: 0; }
         .sidebar {
-          position: fixed; top: var(--nav-h); left: 0; bottom: 0; width: min(320px, 92vw); border-radius: 0; z-index: 50;
-          transform: translateX(-102%); transition: transform .18s ease;
+          position: fixed;
+          top: 0;
+          left: 0;
+          bottom: 0;
+          width: min(320px, 92vw);
+          height: 100vh;
+          border-radius: 0;
+          z-index: 30;
+          max-height: 100vh;
+          overflow-y: auto;
+          padding-top: calc(var(--nav-h) + 20px);
+          transform: translateX(-102%);
+          transition: transform .18s ease;
         }
         .sidebar.open { transform: translateX(0); }
+        .menu-overlay {
+          position: fixed;
+          top: var(--nav-h);
+          left: 0;
+          right: 0;
+          bottom: 0;
+          z-index: 25;
+          background: rgba(10,10,12,0.35);
+        }
+        .menu-overlay.show { display: block; }
+        body.menu-open { overflow: hidden; }
         .content { padding-top: 16px; }
         .cards { grid-template-columns: 1fr; }
+        table {
+          display: block;
+          width: 100%;
+          overflow-x: auto;
+          -webkit-overflow-scrolling: touch;
+        }
       }
     </style>
   </head>
@@ -187,16 +291,18 @@
       <div class="top-nav-inner">
         <div class="brand">
           <button class="menu-btn" id="menuBtn" aria-label="Toggle docs menu">☰</button>
-          <div class="wordmark"><img src="../assets/wren-white.png" alt="" aria-hidden="true" />WrenOS</div>
+          <a class="wordmark" href="/"><img src="../assets/wren-white.png" alt="" aria-hidden="true" />WrenOS</a>
           <span class="badge">DOCS</span>
         </div>
         <div class="top-right">
           <a class="top-link" href="../index.html">← Back to site</a>
           <a class="top-link" href="https://github.com/wrensignal/wrenOS" target="_blank" rel="noreferrer">GitHub</a>
+          <a class="mobile-back-link" href="../index.html" aria-label="Back to site">←</a>
         </div>
       </div>
     </header>
 
+    <div class="menu-overlay" id="menuOverlay" aria-hidden="true"></div>
     <div class="layout">
       <aside class="sidebar" id="sidebar">
         <nav>
@@ -245,12 +351,15 @@
           <h1>WrenOS Documentation</h1>
           <p class="subtitle">The open-source control plane for operator-managed crypto agent systems.</p>
 
-          <div class="stats-block" aria-label="System inventory">
-            <div><span class="prompt">%</span> /system inventory</div>
-            <div class="inv-row"><span class="inv-key">packages</span><span class="inv-val">6</span></div>
-            <div class="inv-row"><span class="inv-key">skills</span><span class="inv-val">17</span></div>
-            <div class="inv-row"><span class="inv-key">mcp_tools</span><span class="inv-val">310+</span></div>
-            <div class="inv-row"><span class="inv-key">agent_packs</span><span class="inv-val">2</span></div>
+          <div class="cred-stats" aria-label="System inventory">
+            <p class="inventory-label">/system inventory</p>
+            <ul class="inventory-list">
+              <li class="inventory-row"><span class="inventory-key">packages</span><span class="inventory-val">6</span></li>
+              <li class="inventory-row"><span class="inventory-key">skills</span><span class="inventory-val">17</span></li>
+              <li class="inventory-row"><span class="inventory-key">mcp_tools</span><span class="inventory-val">310+</span></li>
+              <li class="inventory-row"><span class="inventory-key">agent_packs</span><span class="inventory-val">2</span></li>
+            </ul>
+
           </div>
 
           <h2 id="explore-the-docs">Explore the Docs</h2>
@@ -468,6 +577,7 @@ wrenos doctor && wrenos status</code></pre></div><a class="edit-link" target="_b
       const tocLinks = document.getElementById('tocLinks');
       const sidebar = document.getElementById('sidebar');
       const menuBtn = document.getElementById('menuBtn');
+      const menuOverlay = document.getElementById('menuOverlay');
 
       function getHashPage() {
         const h = (location.hash || '#overview').replace('#', '');
@@ -512,6 +622,7 @@ wrenos doctor && wrenos status</code></pre></div><a class="edit-link" target="_b
         if (current) buildTOC(current);
         if (location.hash.replace('#','') !== page) history.replaceState(null, '', `#${page}`);
         if (window.innerWidth < 769) sidebar.classList.remove('open');
+        syncMenuState();
         window.scrollTo({ top: 0, behavior: 'instant' });
       }
 
@@ -529,7 +640,22 @@ wrenos doctor && wrenos status</code></pre></div><a class="edit-link" target="_b
         });
       });
 
-      menuBtn?.addEventListener('click', () => sidebar.classList.toggle('open'));
+      function syncMenuState() {
+        const isOpen = sidebar.classList.contains('open');
+        const mobile = window.innerWidth < 769;
+        document.body.classList.toggle('menu-open', isOpen && mobile);
+        if (menuOverlay) menuOverlay.classList.toggle('show', isOpen && mobile);
+      }
+
+      menuBtn?.addEventListener('click', () => {
+        sidebar.classList.toggle('open');
+        syncMenuState();
+      });
+      window.addEventListener('resize', syncMenuState);
+      menuOverlay?.addEventListener('click', () => {
+        sidebar.classList.remove('open');
+        syncMenuState();
+      });
       window.addEventListener('hashchange', () => setPage(getHashPage()));
       setPage(getHashPage());
     </script>
