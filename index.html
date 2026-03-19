@@ -1247,7 +1247,7 @@
               </div>
             </article>
 
-            <article class="start-card" data-href="https://github.com/wrensignal/wrenOS">
+            <article class="start-card" data-route="selfHost" data-href="https://github.com/wrensignal/wrenOS#quick-start">
               <span class="tool-icon" aria-hidden="true"><svg class="icon-lucide" viewBox="0 0 24 24"><polyline points="4 17 10 11 4 5"/><line x1="12" x2="20" y1="19" y2="19"/></svg></span>
               <div class="start-body">
                 <div class="start-top">
@@ -1324,7 +1324,7 @@
                 <p class="start-copy">Follow the Railway deploy guide: configure env vars, initialize a profile, then start in paper mode first.</p>
               </article>
 
-              <article class="start-card" data-href="https://github.com/wrensignal/wrenOS">
+              <article class="start-card" data-route="selfHost" data-href="https://github.com/wrensignal/wrenOS#quick-start">
                 <span class="card-corner-arrow" aria-hidden="true"><svg class="icon-lucide" viewBox="0 0 24 24"><line x1="7" y1="17" x2="17" y2="7"/><polyline points="7 7 17 7 17 17"/></svg></span>
                 <div class="start-top">
                   <span class="start-label caps-label">ALREADY RUNNING OPENCLAW?</span>
@@ -1469,23 +1469,78 @@
       </footer>
     </main>
     <script>
-      const WRENOS_ROUTE_CONTRACT = {
-        // Set window.WRENOS_PRIVY_DEPLOY_URL at runtime to route deploy CTA into Privy onboarding.
-        // Fallback remains Railway deploy guide so CTA never dead-ends.
-        deploy: window.WRENOS_PRIVY_DEPLOY_URL || 'https://github.com/wrensignal/wrenOS/blob/main/RAILWAY_DEPLOY.md'
+      const CTA_CONTRACT = {
+        deploy: {
+          fallbackUrl: 'https://github.com/wrensignal/wrenOS/blob/main/RAILWAY_DEPLOY.md',
+          handshakeTimeoutMs: 10000
+        },
+        selfHost: {
+          canonicalQuickstartUrl: 'https://github.com/wrensignal/wrenOS#quick-start'
+        }
       };
 
-      document.querySelectorAll('.start-card[data-route]')?.forEach((card) => {
-        const route = card.getAttribute('data-route');
-        const href = WRENOS_ROUTE_CONTRACT[route] || card.getAttribute('data-href');
-        if (href) card.setAttribute('data-href', href);
-      });
+      function trackCtaEvent(event, payload = {}) {
+        const body = { event, ...payload, at: new Date().toISOString() };
+        if (Array.isArray(window.dataLayer)) window.dataLayer.push(body);
+        try {
+          if (navigator.sendBeacon) {
+            navigator.sendBeacon('/analytics/cta', JSON.stringify(body));
+          }
+        } catch (_) {}
+      }
 
-      document.querySelectorAll('.start-card[data-href]').forEach((card) => {
-        const href = card.getAttribute('data-href');
-        if (!href) return;
-        card.addEventListener('click', (e) => {
+      function isSafeHref(href) {
+        return typeof href === 'string' && /^(https?:\/\/|\/)/.test(href);
+      }
+
+      async function resolveDeployHref() {
+        const directPrivyUrl = window.WRENOS_PRIVY_DEPLOY_URL;
+        if (directPrivyUrl) {
+          trackCtaEvent('cta_auth_success', { route: 'deploy', mode: 'direct_privy_url' });
+          return directPrivyUrl;
+        }
+
+        const handshake = window.WRENOS_PRIVY_HANDSHAKE;
+        if (typeof handshake === 'function') {
+          trackCtaEvent('cta_auth_start', { route: 'deploy' });
+          try {
+            const result = await Promise.race([
+              Promise.resolve().then(() => handshake()),
+              new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), CTA_CONTRACT.deploy.handshakeTimeoutMs))
+            ]);
+            if (result?.deployUrl && isSafeHref(result.deployUrl)) {
+              trackCtaEvent('cta_auth_success', { route: 'deploy', mode: 'handshake' });
+              return result.deployUrl;
+            }
+            trackCtaEvent('cta_auth_dropoff', { route: 'deploy', reason: 'no_deploy_url_returned' });
+            return CTA_CONTRACT.deploy.fallbackUrl;
+          } catch (err) {
+            trackCtaEvent('cta_auth_fail', { route: 'deploy', reason: String(err?.message || err) });
+            return CTA_CONTRACT.deploy.fallbackUrl;
+          }
+        }
+
+        trackCtaEvent('cta_auth_dropoff', { route: 'deploy', reason: 'handshake_not_configured' });
+        return CTA_CONTRACT.deploy.fallbackUrl;
+      }
+
+      async function resolveRouteHref(route, currentHref) {
+        if (route === 'selfHost') return CTA_CONTRACT.selfHost.canonicalQuickstartUrl;
+        if (route === 'deploy') return resolveDeployHref();
+        return currentHref;
+      }
+
+      document.querySelectorAll('.start-card[data-href], .start-card[data-route]').forEach((card) => {
+        card.addEventListener('click', async (e) => {
           if (e.target.closest('a')) return;
+          const route = card.getAttribute('data-route') || 'direct';
+          const currentHref = card.getAttribute('data-href');
+          const href = await resolveRouteHref(route, currentHref);
+          if (!isSafeHref(href)) {
+            trackCtaEvent('cta_auth_fail', { route, reason: 'unsafe_href' });
+            return;
+          }
+          trackCtaEvent('cta_click', { route, href });
           window.open(href, '_blank', 'noopener,noreferrer');
         });
       });
