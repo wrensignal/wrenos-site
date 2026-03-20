@@ -1,3 +1,3 @@
-# 0xClaw Site
+# WrenOS Site
 
-Landing page for 0xClaw.
+Landing page and docs shell for WrenOS (`wrenos.ai`).

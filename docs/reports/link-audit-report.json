@@ -1,0 +1,21 @@
+{
+  "ok": true,
+  "filesScanned": 7,
+  "linksScanned": 103,
+  "broken": [],
+  "legacyRefs": [
+    {
+      "file": "docs/index.html",
+      "count": 9
+    },
+    {
+      "file": "docs/site-ownership.md",
+      "count": 3
+    },
+    {
+      "file": "docs/release-readiness/baseline.md",
+      "count": 2
+    }
+  ],
+  "generatedAt": "2026-03-19T23:19:38.667Z"
+}
