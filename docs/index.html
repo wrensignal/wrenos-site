@@ -708,5 +708,13 @@ wrenos doctor && wrenos status</code></pre></div><a class="edit-link" target="_b
       window.addEventListener('hashchange', () => setPage(getHashPage()));
       setPage(getHashPage());
     </script>
+  
+    <script>
+      fetch('/docs/provenance.json').then(r=>r.json()).then(p=>{
+        const el=document.getElementById('docs-synced-sha');
+        if(el&&p.syncedCommit) el.textContent = p.syncedCommit.slice(0,12);
+      }).catch(()=>{});
+    </script>
+
   </body>
 </html>

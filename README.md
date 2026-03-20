@@ -11,3 +11,8 @@ Run the site/docs regression checks locally:
 ```
 
 Artifacts are written to `docs/reports/site-regression-report.json`.
+
+
+## Docs provenance
+- Provenance marker source: `docs/provenance.json`
+- Drift check: `node scripts/check-docs-drift.mjs --strict`
