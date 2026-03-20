@@ -20,6 +20,9 @@ jobs:
       - name: Run site/docs regression audit
         run: node scripts/site-regression-audit.mjs
 
+      - name: Check docs drift
+        run: node scripts/check-docs-drift.mjs --strict
+
       - name: Upload regression artifact
         if: always()
         uses: actions/upload-artifact@v4
