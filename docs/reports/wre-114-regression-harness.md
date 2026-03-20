@@ -19,3 +19,8 @@ Checks include:
 ## Current result
 - 11/11 checks passing
 - No P0/P1 regressions detected in this baseline run
+
+## CI integration
+- Added `.github/workflows/site-regression.yml`
+- Runs `node scripts/site-regression-audit.mjs` on PRs and main pushes
+- Uploads `docs/reports/site-regression-report.json` as workflow artifact
